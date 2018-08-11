@@ -6,7 +6,10 @@
   "scripts": {
     "test": "mocha server/**/*.test.js",
     "test-watch": "nodemon --exec 'npm test'",
-    "start": "nodemon server.js"
+    "start": "node server/server.js"
+  },
+  "engines": {
+    "node": "8.11.3"
   },
   "author": "Chanyee Kim",
   "license": "ISC",
