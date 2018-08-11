@@ -99,3 +99,41 @@ describe('GET /companies/:id', () => {
       .end(done);
   });
 });
+
+describe('DELETE /companies/:id', () => {
+  it('should remove a company', (done) => {
+    var hexId = companies[1]._id.toHexString();
+
+    request(app)
+      .delete(`/companies/${hexId}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.company._id).toBe(hexId);
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Company.findById(hexId).then((company) => {
+          expect(company).toBeNull();
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+
+  it('should return 404 if company not found', (done) => {
+    var hexId = new ObjectID().toHexString();
+    request(app)
+      .delete(`/companies/${hexId}`)
+      .expect(404)
+      .end(done);
+  });
+
+  it('should return 404 if object id is invalid', (done) => {
+    request(app)
+      .delete(`/companies/123`)
+      .expect(404)
+      .end(done);
+  });
+})
