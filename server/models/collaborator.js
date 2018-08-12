@@ -5,18 +5,22 @@ var collaboratorSchema = Schema({
   name: {
     type: String,
     required: true,
+    unique: true,
     minlength: 1,
     trim: true
   },
   email: {
     type: String,
     required: true,
+    unique: true,
     minlength: 1,
     trim: true
   },
-  company: {
-    type: Schema.Types.ObjectId,
-    ref: 'Company'
+  companyName: {
+    type: String,
+    required: true,
+    minlength: 1,
+    trim: true
   },
   manager: {
     type: Schema.Types.ObjectId,

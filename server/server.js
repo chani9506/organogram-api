@@ -5,65 +5,83 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 
-var {mongoose} = require('./db/mongoose');
-var {Company} = require('./models/company');
-var {Collaborator} = require('./models/collaborator');
+const {mongoose} = require('./db/mongoose');
+const {Company} = require('./models/company');
+const {Collaborator} = require('./models/collaborator');
 
-var app = express();
+const app = express();
 const port = process.env.PORT;
 
 app.use(bodyParser.json());
 
-app.post('/companies', (req, res) => {
-  var company = new Company({
-    name: req.body.name
-  });
-
-  company.save().then((doc) => {
-    res.send(doc);
-  }, (e) => {
-    res.status(400).send(e);
-  });
-});
-
-app.get('/companies', (req, res) => {
-  Company.find().then((companies) => {
-    res.send({companies});
-  }, (e) => {
-    res.status(400).send(e);
-  });
-});
-
-app.get('/companies/:name', (req, res) => {
-  var name = req.params.name;
+app.post('/companies', async (req, res) => {
+  try {
+    const company = new Company({
+      name: req.body.name
+    });
   
-  Company.find({name}).then((company) => {
-    if (!company) {
-      return res.status(404).send();
-    }
-
-    res.send({company});
-  }).catch((e) => {
-    res.status(400).send();
-  });
+    const doc = await company.save();
+    res.send(doc);
+  } catch (e) {
+    res.status(400).send(e);
+  };
 });
 
-app.delete('/companies/:id', (req, res) => {
-  var id = req.params.id;
-
-  if (!ObjectID.isValid(id)) {
-    return res.status(404).send();
+app.get('/companies', async (req, res) => {
+  try {
+    const companies = await Company.find().populate('collaborators');
+    res.send({companies});
+  } catch (e) {
+    res.status(400).send(e);
   }
+});
 
-  Company.findByIdAndRemove(id).then((company) => {
+app.get('/companies/:name', async (req, res) => {
+  try {
+    const name = req.params.name;
+    const company = await Company.findOne({name});
+
     if (!company) {
       return res.status(404).send();
     }
 
     res.send({company});
-  }).catch((e) => {
+  } catch (e) {
     res.status(400).send();
-  });
+  }
+});
+
+app.delete('/companies/:name', async (req, res) => {
+  try {
+    const name = req.params.name;
+    const company = await Company.findOneAndRemove({name});
+
+    if (!company) {
+      return res.status(404).send();
+    }
+
+    res.send({company});
+  } catch (e) {
+    res.status(400).send(e);
+  }
+});
+
+app.post('/collaborators', async (req, res) => {
+  try {
+    const companyName = req.body.companyName;
+    
+    const collaborator = new Collaborator({
+      name: req.body.name,
+      email: req.body.email,
+      companyName,
+    });
+
+    const doc = await collaborator.save();
+    
+    res.send(doc);
+  } catch (e) {
+    res.status(400).send(e);
+  }
 });
 
 app.listen(port, () => {

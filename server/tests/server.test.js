@@ -1,15 +1,12 @@
 const expect = require('expect');
 const request = require('supertest');
-const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Company} = require('./../models/company');
 
 const companies = [{
-  _id: new ObjectID(),
   name: 'First test company'
 }, {
-  _id: new ObjectID(),
   name: 'Second test company'
 }];
 
@@ -21,7 +18,7 @@ beforeEach((done) => {
 
 describe('POST /companies', () => {
   it('should create a new company', (done) => {
-    var name = 'Test company name';
+    const name = 'Test company name';
 
     request(app)
       .post('/companies')
@@ -59,6 +56,23 @@ describe('POST /companies', () => {
         }).catch((e) => done(e));
       });
   });
+
+  it('should not create company that already exists', (done) => {
+    request(app)
+      .post('/companies')
+      .send({name: companies[0].name})
+      .expect(400)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Company.find().then((companies) => {
+          expect(companies.length).toBe(2);
+          done();
+        }).catch((e) => done(e));
+      });
+  });
 });
 
 describe('GET /companies', () => {
@@ -73,10 +87,10 @@ describe('GET /companies', () => {
   });
 });
 
-describe('GET /companies/:id', () => {
-  it('should return company doc', (done) => {
+describe('GET /companies/:name', () => {
+  it('should return a company', (done) => {
     request(app)
-      .get(`/companies/${companies[0]._id.toHexString()}`)
+      .get(`/companies/${companies[0].name}`)
       .expect(200)
       .expect((res) => {
         expect(res.body.company.name).toBe(companies[0].name);
@@ -84,38 +98,30 @@ describe('GET /companies/:id', () => {
       .end(done);
   });
 
-  it('should return 404 if todo not found', (done) => {
-    var hexId = new ObjectID().toHexString();
+  it('should return 404 if company not found', (done) => {
     request(app)
-      .get(`/companies/${hexId}`)
-      .expect(404)
-      .end(done);
-  });
-
-  it('should return 404 if todo not found', (done) => {
-    request(app)
-      .get(`/companies/123`)
+      .get(`/companies/non`)
       .expect(404)
       .end(done);
   });
 });
 
-describe('DELETE /companies/:id', () => {
+describe('DELETE /companies/:name', () => {
   it('should remove a company', (done) => {
-    var hexId = companies[1]._id.toHexString();
+    const name = companies[0].name;
 
     request(app)
-      .delete(`/companies/${hexId}`)
+      .delete(`/companies/${name}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body.company._id).toBe(hexId);
+        expect(res.body.company.name).toBe(name);
       })
       .end((err, res) => {
         if (err) {
           return done(err);
         }
 
-        Company.findById(hexId).then((company) => {
+        Company.findOne({name}).then((company) => {
           expect(company).toBeNull();
           done();
         }).catch((e) => done(e));
@@ -123,16 +129,8 @@ describe('DELETE /companies/:id', () => {
   });
 
   it('should return 404 if company not found', (done) => {
-    var hexId = new ObjectID().toHexString();
     request(app)
-      .delete(`/companies/${hexId}`)
-      .expect(404)
-      .end(done);
-  });
-
-  it('should return 404 if object id is invalid', (done) => {
-    request(app)
-      .delete(`/companies/123`)
+      .delete(`/companies/non`)
       .expect(404)
       .end(done);
   });
