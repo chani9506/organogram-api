@@ -5,7 +5,6 @@ var collaboratorSchema = Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
     minlength: 1,
     trim: true
   },
@@ -20,12 +19,21 @@ var collaboratorSchema = Schema({
     type: String,
     required: true,
     minlength: 1,
-    trim: true
+    trim: true,
   },
-  manager: {
-    type: Schema.Types.ObjectId,
-    ref: 'Collaborator'
+  managerEmail: {
+    type: String,
+    minlength: 1,
+    trim: true,
   }
+}, {
+  toJSON: {virtuals: true}
+});
+
+collaboratorSchema.virtual('managed', {
+  ref: 'Collaborator',
+  localField: 'email',
+  foreignField: 'managerEmail'
 });
 
 var Collaborator = mongoose.model('Collaborator', collaboratorSchema);
