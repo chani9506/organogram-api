@@ -152,6 +152,10 @@ app.patch('/collaborators/:companyName/:email', async (req, res) => {
 
     const collaborator = await Collaborator.findOneAndUpdate({companyName, email}, {$set: body}, {new: true});
 
+    if (!collaborator) {
+      return res.status(404).send();
+    }
+
     res.send({collaborator});
   } catch (e) {
     res.status(400).send(e);
