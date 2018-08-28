@@ -5,15 +5,10 @@
 1. **Ensure you have Node & MongoDB installed**
     - Ensure you're using correct Node version - `$ nvm use`
     - If you don't have it, install Node - `$ nvm install`
-    - Run MongoDB before you start runnig the API
+    - Run MongoDB before you start running the API
 
-2. **Ensure you have Node & MongoDB installed**
-    - Ensure you're using correct Node version - `$ nvm use`
-    - If you don't have it, install Node - `$ nvm install`
-    - Run MongoDB before you start runnig the API
-
-3. **Make `config.json` file to set required environment variables.**
-* config.json Sample
+2. **Make `config.json` file to set required environment variables.**
+* config.json sample
 ```
 {
   "test": {
@@ -27,7 +22,7 @@
 }
 ```
 
-4. **Install npm dependencies**
+3. **Install npm dependencies**
     - Run `$ npm install` to install npm dependencies.
 
 ---
